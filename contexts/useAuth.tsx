@@ -1,37 +1,56 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState, useEffect, FC } from 'react';
+import { createContext, useContext, useState, useEffect, FC, use } from 'react';
 import firebase_app from '@/firebase/config';
-import { createUserWithEmailAndPassword, signInWithPopup, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signOut as signOut_f } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  updateProfile as fb_updateProfile,
+  signOut as fb_signOut,
+} from 'firebase/auth';
+import { redirect } from 'next/navigation';
 
 const auth = getAuth(firebase_app);
 
 // Define the user type
 interface User {
+  name: string | null;
   uid: string;
   email: string | null;
+  photoURL: string | null;
+  phoneNumber: string | null;
+  emailVerified: boolean;
+  role?: string;
 }
 
 // Define the context properties
 interface AuthContextProps {
   user: User | null;
+  profileIsComplete: boolean;
   loading: boolean;
   error: string | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  updateProfile: (name?: string, phoneNumber?: string) => Promise<void>;
 }
 
 // 1. Create the Context
 const AuthContext = createContext<AuthContextProps>({
   user: null,
+  profileIsComplete: false,
   loading: true,
   error: null,
-  signIn: async () => { },
-  signUp: async () => { },
-  signOut: async () => { },
-  signInWithGoogle: async () => { },
+  signIn: async () => {},
+  signUp: async () => {},
+  signOut: async () => {},
+  signInWithGoogle: async () => {},
+  updateProfile: async () => {},
 });
 
 // 2. Create a Provider
@@ -39,10 +58,12 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [profileIsComplete, setProfileIsComplete] = useState<boolean>(false);
 
   const signIn = async (email: string, password: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      // redirect('/');
     } catch (error: any) {
       setError(error.message);
     }
@@ -58,7 +79,8 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const signOut = async () => {
     try {
-      await signOut_f(auth);
+      await fb_signOut(auth);
+      redirect('/login');
     } catch (error: any) {
       setError(error.message);
     }
@@ -75,10 +97,45 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
     }
   };
 
+  const updateProfile = async (name?: string) => {
+    if (!auth.currentUser) return;
+
+    const newUser: any = {};
+    name && (newUser['displayName'] = name);
+    // phoneNumber && (newUser['phoneNumber'] = phoneNumber);
+
+    try {
+      await fb_updateProfile(auth.currentUser, newUser);
+      setProfileIsComplete(true);
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
+  const checkProfile = (user: User) => {
+    if (user) {
+      if (user.name) {
+        setProfileIsComplete(true);
+      } else {
+        setProfileIsComplete(false);
+      }
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUser({ uid: user.uid, email: user.email });
+        const newUser = {
+          name: user.displayName,
+          uid: user.uid,
+          email: user.email,
+          photoURL: user.photoURL,
+          phoneNumber: user.phoneNumber,
+          emailVerified: user.emailVerified,
+        };
+        setUser(newUser);
+        checkProfile(newUser);
+        console.log('User:', newUser);
       } else {
         setUser(null);
       }
@@ -88,13 +145,17 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
     return () => unsubscribe();
   }, []);
 
-  const value = { user, loading, error, signIn, signUp, signOut, signInWithGoogle };
+  useEffect(() => {
+    const printError = () => {
+      if (error) console.log('Error:', error);
+    };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+    return () => printError();
+  }, [error]);
+
+  const value = { user, loading, error, signIn, signUp, signOut, signInWithGoogle, updateProfile, profileIsComplete };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

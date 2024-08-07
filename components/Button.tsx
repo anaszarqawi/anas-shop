@@ -1,43 +1,10 @@
-// import React from 'react';
-
-// type ButtonProps = {
-//   text: string;
-//   disabled?: boolean;
-//   loading?: boolean;
-//   link?: string;
-//   onClick?: () => void;
-// };
-
-
-
-// const Button = ({ text, disabled, loading, link, onClick }: ButtonProps) => {
-//   return (
-//     // <button className="bg-zinc-800 text-zinc-50 rounded-full px-6 py-3 font-normal transition-colors hover:bg-zinc-900">Sign In</button>
-//     <button onClick={onClick} className={`bg-zinc-800 text-zinc-50 rounded-full px-6 py-3 font-normal border border-zinc-700 transition-colors hover:bg-zinc-900 ${disabled ? 'cursor-not-allowed' : ''}`}>
-//       {loading ? 'Loading...' : text}
-//     </button>
-//   );
-// };
-
-// export default Button;
-
-// import React from 'react';
-
-// const Banner = () => {
-//   return (
-//     <div className="bg-zinc-800 h-[300px] w-full flex justify-center items-center rounded-3xl">
-//     </div >
-//   );
-// };
-
-// export default Banner;
-
-
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Button {
   type?: 'button' | 'submit' | 'reset';
+  className?: string;
   priority?: 'primary' | 'secondary' | 'tertiary';
   theme?: 'blue' | 'black' | 'semiWhite' | 'danger';
   emoji?: string;
@@ -48,12 +15,14 @@ interface Button {
   onClick?: () => void;
   emojiPosition?: 'left' | 'right';
   fontWeight?: 'normal' | 'medium' | 'bold';
-  icon?: any;
+  icon?: string;
+  alt?: string;
   loading?: boolean;
 }
 
 const Button = ({
   type = 'button',
+  className,
   priority,
   theme,
   label,
@@ -65,17 +34,31 @@ const Button = ({
   fontWeight,
   onClick,
   icon,
+  alt,
   loading,
 }: Button) => {
-
   return !link ? (
-    <button type={type} className="w-full bg-zinc-800 text-zinc-50 rounded-full px-6 py-3 font-normal border border-zinc-700 transition-colors hover:bg-zinc-900"
-      disabled={disabled} onClick={onClick}>
-      {label}
+    <button
+      type={type}
+      className={
+        'flex flex-row items-center justify-center gap-2 w-full bg-zinc-800 text-zinc-100 rounded-2xl px-6 py-3 font-normal border border-zinc-700 transition-colors hover:bg-zinc-900 cursor-pointer' +
+        (disabled ? ' !text-zinc-400 bg-zinc-700 cursor-default hover:bg-zinc-700' : '') +
+        (className ? ` ${className}` : '')
+      }
+      disabled={disabled}
+      onClick={onClick}>
+      {icon && alt && <Image priority src={icon} className="fill-zinc-100" alt={alt} width={20} height={20} />}
+      {loading ? 'Loading...' : label}
     </button>
   ) : (
     link && (
-      <Link href={link} className="w-full bg-zinc-800 text-zinc-50 rounded-full px-6 py-3 font-normal border border-zinc-700 transition-colors hover:bg-zinc-900">
+      <Link
+        href={link}
+        className={
+          'flex flex-row items-center justify-center gap-2 w-full bg-zinc-100 text-zinc-50 rounded-2xl px-6 py-3 font-normal border border-zinc-700 transition-colors hover:bg-zinc-900 cursor-pointer' +
+          (className ? ` ${className}` : '')
+        }>
+        {icon && alt && <Image priority src={icon} className="fill-zinc-100" alt={alt} width={20} height={20} />}
         {loading ? 'Loading...' : label}
       </Link>
     )

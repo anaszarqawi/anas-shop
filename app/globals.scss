@@ -2,16 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 @import 'material-symbols';
+
 @layer utilities {
     .text-balance {
         text-wrap: balance;
     }
+
     .filled {
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
+
     .button-shadow {
         box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
     }
+
     .red-500 {
         color: #f44336;
     }

@@ -1,13 +1,14 @@
-import React from 'react';
-import { Path, UseFormRegister } from 'react-hook-form';
+import React, { useEffect } from 'react';
+import { Path, useController, useForm, UseFormRegister } from 'react-hook-form';
 import { getErrorMsg } from '@/utils/errorMessages';
 
 interface inputProps {
-  type: 'text' | 'password' | 'email' | 'number' | 'select' | 'textarea' | 'checkbox' | 'radio';
+  type: 'text' | 'password' | 'email' | 'number' | 'select' | 'textarea' | 'checkbox' | 'radio' | 'tel';
   name: string;
   label: Path<any>;
   placeholder?: string;
   value?: any;
+  defaultValue?: any;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   error?: any;
   options?: { label: string | number; value: string | number }[];
@@ -16,10 +17,6 @@ interface inputProps {
   className?: string;
   style?: React.CSSProperties;
   required?: boolean;
-  min?: number;
-  max?: number;
-  step?: number;
-  rows?: number;
   autoComplete?: string;
   autoFocus?: boolean;
   width?: 'full' | 'fit';
@@ -31,6 +28,7 @@ const Input = ({
   name,
   label,
   placeholder,
+  defaultValue,
   value,
   onChange,
   error,
@@ -40,124 +38,41 @@ const Input = ({
   className,
   style,
   required,
-  min,
-  max,
-  step,
-  rows,
   autoComplete,
   autoFocus,
   width,
   register,
 }: inputProps) => {
   const [passwordVisible, setPasswordVisible] = React.useState(false);
-
-  // if (type === 'select' && options) {
-  //   return (
-  //     <div className={styles.inputContainer}>
-  //       <select
-  //         className={`${styles.input} ${styles.select} ${width === 'full' ? styles.full : styles.fit} ${error ? styles.error : ''
-  //           }`}
-  //         id={name}
-  //         disabled={disabled}
-  //         style={style}
-  //         defaultValue=""
-  //         {...register(name, { required })}>
-  //         <option value="" disabled={true} hidden={true}></option>
-  //         {options.map((option) => (
-  //           <option key={option.value} value={option.value}>
-  //             {option.label}
-  //           </option>
-  //         ))}
-  //       </select>
-  //       <div className={`${styles.label} ${value !== '' ? styles.filled : ''}`}>{label}</div>
-  //     </div>
-  //   );
-  // }
-
-  // if (type === 'textarea') {
-  //   return (
-  //     <div className={styles.inputContainer}>
-  //       <textarea
-  //         className={`${styles.input} ${styles.textarea} ${width === 'full' ? styles.full : styles.fit} ${error ? styles.error : ''
-  //           }`}
-  //         name={name}
-  //         id={name}
-  //         placeholder={placeholder}
-  //         value={value}
-  //         disabled={disabled}
-  //         style={style}
-  //         required={required}
-  //         rows={rows}
-  //       />
-  //       <div className={`${styles.label} ${value !== '' ? styles.filled : ''}`}>{label}</div>
-  //     </div>
-  //   );
-  // }
-
-  // if (type === 'checkbox') {
-  //   return (
-  //     <div className={`${styles.inputContainer} ${type === 'checkbox' ? styles.checkbox : ''}`}>
-  //       <input
-  //         className={`${styles.input} ${width === 'full' ? styles.full : styles.fit} ${error ? styles.error : ''}`}
-  //         type={type}
-  //         name={name}
-  //         id={name}
-  //         placeholder={placeholder}
-  //         value={value}
-  //         checked={checked}
-  //         disabled={disabled}
-  //         style={style}
-  //         required={required}
-  //         min={min}
-  //         max={max}
-  //         step={step}
-  //         autoComplete={autoComplete}
-  //         autoFocus={autoFocus}
-  //         width={width}
-  //       />
-  //       <label className={`${styles.label} ${value !== '' ? styles.filled : ''}`} htmlFor={name}>
-  //         {label}
-  //       </label>
-  //     </div>
-  //   );
-  // }
+  const [isFocused, setIsFocused] = React.useState(false);
 
   return (
-    <div className='w-full'>
-      {/* {type === 'password' &&
-        (passwordVisible ? (
-          <div className='w-4 h-4' onClick={() => setPasswordVisible(false)}>
-            Hide
-          </div>
-        ) : (
-          <div className="w-4 h-4" onClick={() => setPasswordVisible(true)}>
-            Show
-          </div>
-        ))} */}
-      <input
-        className={`w-full bg-zinc-900 text-zinc-50 placeholder-zinc-500 rounded-full px-6 py-3 font-normal border border-zinc-700 transition-colors hover:bg-zinc-900 focus:border-zinc-300 outline-none`}
-        type={type === 'password' && passwordVisible ? 'text' : type}
-        id={name}
-        placeholder={placeholder}
-        checked={checked}
-        disabled={disabled}
-        style={style}
-        min={min}
-        max={max}
-        step={step}
-        autoComplete={autoComplete}
-        autoFocus={autoFocus}
-        {...register(name, { required })}
-      />
-
-      {/* <label
-        className={`${styles.label} ${value !== '' ? styles.filled : ''} ${error ? styles.error : ''}`}
-        htmlFor={name}>
-        {label}
-      </label> */}
+    <div className="w-full">
+      <div className="relative">
+        <label
+          className={`absolute left-0 py-3 px-6 block mb-2 text-zinc-400 transition-all duration-150 ease-in-out ${
+            isFocused || value ? '-top-[10px] left-4 py-0 px-1 text-sm bg-zinc-900' : 'top-0 text-base'
+          }`}>
+          {label}
+        </label>
+        <input
+          className={`w-full bg-zinc-900 text-zinc-50 placeholder-zinc-500 rounded-2xl px-6 py-3 font-normal border border-zinc-700 transition-colors hover:bg-zinc-900 focus:border-zinc-300 outline-none ${
+            disabled ? 'cursor-not-allowed' : 'cursor-text'
+          } ${error ? 'border-red-500' : ''}`}
+          type={type === 'password' && passwordVisible ? 'text' : type}
+          id={name}
+          checked={checked}
+          disabled={disabled}
+          style={style}
+          autoComplete={autoComplete}
+          defaultValue={defaultValue}
+          onFocus={() => setIsFocused(true)}
+          {...register(name, { required, onBlur: () => setIsFocused(false) })}
+        />
+      </div>
 
       {error && (
-        <div className='text-red-500 text-sm'>
+        <div className="text-red-500 text-sm">
           {/* <Emoji emoji="❗️" width={12} height={12} /> */}❗️
           {getErrorMsg(error)}
         </div>

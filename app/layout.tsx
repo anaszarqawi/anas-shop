@@ -1,14 +1,12 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.scss";
-import Nav from "@/components/Nav";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.scss';
+import Nav from '@/components/Nav';
 import 'material-symbols/rounded.css';
-import { ReduxProvider } from "@/redux/provider";
-import { AuthProvider } from "@/contexts/useAuth";
+import { ReduxProvider } from '@/redux/provider';
+import { AuthProvider } from '@/contexts/useAuth';
 
-
-
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 // export const metadata: Metadata = {
 //   title: "Anas Zarqawi",
@@ -32,9 +30,6 @@ const inter = Inter({ subsets: ["latin"] });
 //   },
 // };
 
-
-
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,12 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.className} bg-zinc-950 leading-relaxed text-zinc-100 antialiased selection:bg-zinc-700 selection:text-zinc-300`}>
-        <div className="mx-auto min-h-screen max-w-screen-xl px-6 py-16 font-sans">
-          <AuthProvider>
-            <Nav />
-            {children}
-          </AuthProvider>
-        </div>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

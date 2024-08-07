@@ -12,20 +12,20 @@ import { z } from "zod";
 
 const loginSchema = z
   .object({
-    name: z.string(),
+    // name: z.string(),
     email: z.string().email(),
     password: z.string().min(8),
   })
   .required();
 
 type Inputs = {
-  name: string;
+  // name: string;
   email: string;
   password: string;
 };
 
 const SignUp = () => {
-  const { signInWithGoogle } = useAuth();
+  const { signUp, user } = useAuth();
   const {
     register,
     handleSubmit,
@@ -35,18 +35,17 @@ const SignUp = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: any) => console.log(data); // TODO: Add login logic
-
-
-  const handleLogin = async () => {
-    await signInWithGoogle();
+  const onSubmit = async (data: any) => {
+    console.log(data);
+    await signUp(data.email, data.password);
   }
 
 
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center gap-4 w-full">
-      <Input
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center gap-4 w-full">
+        {/* <Input
         type="text"
         name="name"
         label="Name"
@@ -54,27 +53,30 @@ const SignUp = () => {
         width="full"
         register={register}
         error={errors.name}
-      />
-      <Input
-        type="email"
-        name="email"
-        label="Email"
-        placeholder="Enter your email"
-        width="full"
-        register={register}
-        error={errors.email}
-      />
-      <Input
-        type="password"
-        name="password"
-        label="Password"
-        placeholder="Enter your password"
-        width="full"
-        register={register}
-        error={errors.password}
-      />
-      <Button type="submit" label="Create account" priority="primary" theme="black" width="full" disabled={!isValid} />
-    </form>
+      /> */}
+        <Input
+          type="email"
+          name="email"
+          label="Email"
+          placeholder="Enter your email"
+          width="full"
+          register={register}
+          error={errors.email}
+        />
+        <Input
+          type="password"
+          name="password"
+          label="Password"
+          placeholder="Enter your password"
+          width="full"
+          register={register}
+          error={errors.password}
+        />
+        <Button type="submit" label="Create account" priority="primary" theme="black" width="full" disabled={!isValid} />
+      </form>
+
+    </>
+
   );
 };
 
